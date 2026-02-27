@@ -1,5 +1,5 @@
 [package]
-name = "simple_midi_sampler_vst3"
+name = "simple_monophonic_saw_synth"
 version = "0.1.0"
 edition = "2024"
 
@@ -12,6 +12,5 @@ members = [
 ]
 
 [dependencies]
-hound = "3.5.1"
 nih_plug = { git = "https://github.com/robbert-vdh/nih-plug", features = ["vst3"] }
 nih_plug_derive = { git = "https://github.com/robbert-vdh/nih-plug" }
