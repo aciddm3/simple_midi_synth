@@ -2,111 +2,15 @@ use nih_plug::prelude::*;
 use std::sync::Arc;
 
 use crate::{adsr::Adsr, oscillator::WaveformOscillator};
-
 mod adsr;
 mod oscillator;
 mod utils;
+mod simple_synth_struct;
+mod simple_synth_parameters;
+mod gui;
 
-struct ActiveNote {
-    midi_note: u8,
-}
 
-struct SimpleSynth {
-    params: Arc<SimpleSynthParams>,
-    active_note: Option<ActiveNote>,
-    sample_rate: f32,
-    amp_env: adsr::Adsr,
-    osc_sin: WaveformOscillator,
-    osc_saw: WaveformOscillator,
-    osc_freq: f32,
-}
-
-impl Default for SimpleSynth {
-    fn default() -> Self {
-        Self {
-            params: Arc::new(SimpleSynthParams::default()),
-            active_note: None,
-            sample_rate: 44100.0,
-            amp_env: Adsr::new(0.5, 0.25, 1.0, 1.0),
-            osc_sin: WaveformOscillator::new(
-                (-512..=512)
-                    .map(|s| (std::f32::consts::PI * s as f32 / 512.0).sin())
-                    .collect(),
-                0.5,
-            ),
-            osc_saw: WaveformOscillator::new(vec![-1.0, 1.0], 0.5),
-            osc_freq: 440.0,
-        }
-    }
-}
-
-#[derive(Params)]
-struct SimpleSynthParams {
-    #[id = "gain"]
-    pub gain: FloatParam,
-    #[id = "transpose"]
-    pub transpose: IntParam,
-    #[id = "amp_env_attack"]
-    pub amp_adsr_attack: FloatParam,
-    #[id = "amp_env_decay"]
-    pub amp_adsr_decay: FloatParam,
-    #[id = "amp_env_sustain"]
-    pub amp_adsr_sustain: FloatParam,
-    #[id = "amp_env_release"]
-    pub amp_adsr_release: FloatParam,
-    #[id = "osc_xfader"]
-    pub osc_xfade: FloatParam,
-}
-
-impl Default for SimpleSynthParams {
-    fn default() -> Self {
-        Self {
-            gain: FloatParam::new(
-                "Gain",
-                util::db_to_gain(-10.0), // Дефолтное значение: -10 dB
-                FloatRange::Linear {
-                    min: util::db_to_gain(-20.0),
-                    max: util::db_to_gain(20.0),
-                },
-            )
-            .with_unit("dB")
-            .with_value_to_string(Arc::new(move |v| format!("{:.1}", util::gain_to_db(v))))
-            .with_string_to_value(Arc::new(move |s| s.parse().ok().map(util::db_to_gain))),
-            transpose: IntParam::new("Transpose", 0, IntRange::Linear { min: -48, max: 48 })
-                .with_unit("st"),
-            amp_adsr_attack: FloatParam::new(
-                "Attack",
-                0.5,
-                FloatRange::Linear { min: 0.0, max: 8.0 },
-            )
-            .with_unit("sec"),
-            amp_adsr_decay: FloatParam::new(
-                "Decay",
-                0.25,
-                FloatRange::Linear { min: 0.0, max: 8.0 },
-            )
-            .with_unit("sec"),
-            amp_adsr_sustain: FloatParam::new(
-                "Sustain",
-                100.0,
-                FloatRange::Linear {
-                    min: 0.0,
-                    max: 100.0,
-                },
-            )
-            .with_unit("%"),
-            amp_adsr_release: FloatParam::new(
-                "Release",
-                1.0,
-                FloatRange::Linear { min: 0.0, max: 8.0 },
-            )
-            .with_unit("sec"),
-            osc_xfade: FloatParam::new("Osc xfade", 0.0, FloatRange::Linear { min: 0.0, max: 1.0 }),
-        }
-    }
-}
-
-impl Plugin for SimpleSynth {
+impl Plugin for simple_synth_struct::SimpleSynth {
     type SysExMessage = ();
     type BackgroundTask = ();
     const NAME: &'static str = "Simple Monophonic Synth";
@@ -170,7 +74,7 @@ impl Plugin for SimpleSynth {
             match event {
                 NoteEvent::NoteOn { note, velocity, .. } => {
                     if velocity > 0.0 {
-                        self.active_note = Some(ActiveNote { midi_note: note });
+                        self.active_note = Some(simple_synth_struct::ActiveNote { midi_note: note });
                         self.amp_env.gate_on();
                     }
                 }
@@ -186,7 +90,7 @@ impl Plugin for SimpleSynth {
             }
         }
 
-        if let Some(ActiveNote { midi_note }) = &mut self.active_note {
+        if let Some(simple_synth_struct::ActiveNote { midi_note }) = &mut self.active_note {
             self.osc_freq = utils::note_to_freq(
                 (*midi_note as i32 + self.params.transpose.value()) as f32,
                 440.0,
@@ -197,7 +101,7 @@ impl Plugin for SimpleSynth {
 
         for sample_index in 0..num_samples {
             let x_fader_ratio = self.params.osc_xfade.smoothed.next();
-            let gain = self.params.gain.smoothed.next();
+            let gain = util::db_to_gain(self.params.gain.smoothed.next());
             for channels in buffer.as_slice() {
                 channels[sample_index] = utils::xfader(
                     self.osc_sin.get_value(),
@@ -218,13 +122,16 @@ impl Plugin for SimpleSynth {
 
         ProcessStatus::Normal
     }
+    fn editor(&mut self, async_executor: AsyncExecutor<Self>) -> Option<Box<dyn Editor>> {
+        self.make_gui(async_executor)
+    }
 }
 
-impl Vst3Plugin for SimpleSynth {
+impl Vst3Plugin for simple_synth_struct::SimpleSynth {
     const VST3_CLASS_ID: [u8; 16] = [
         98, 218, 94, 45, 78, 44, 74, 204, 167, 126, 143, 79, 37, 188, 237, 20,
     ];
     const VST3_SUBCATEGORIES: &'static [Vst3SubCategory] = &[Vst3SubCategory::Instrument];
 }
 
-nih_export_vst3!(SimpleSynth);
+nih_export_vst3!(simple_synth_struct::SimpleSynth);

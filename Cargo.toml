@@ -1,5 +1,5 @@
 [package]
-name = "simple_monophonic_saw_synth"
+name = "aciddm3_simple_monophonic_synth"
 version = "0.1.0"
 edition = "2024"
 
@@ -13,4 +13,5 @@ members = [
 
 [dependencies]
 nih_plug = { git = "https://github.com/robbert-vdh/nih-plug", features = ["vst3"] }
+nih_plug_egui = { git = "https://github.com/robbert-vdh/nih-plug" }
 nih_plug_derive = { git = "https://github.com/robbert-vdh/nih-plug" }
