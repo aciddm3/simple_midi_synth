@@ -1,14 +1,13 @@
 use nih_plug::prelude::*;
-use std::sync::Arc;
+use std::{f32::consts::FRAC_2_PI, sync::Arc};
 
-use crate::{adsr::Adsr, oscillator::WaveformOscillator};
+use crate::{adsr::Adsr, oscillator::SineOscillator};
 mod adsr;
-mod oscillator;
-mod utils;
-mod simple_synth_struct;
-mod simple_synth_parameters;
 mod gui;
-
+mod oscillator;
+mod simple_synth_parameters;
+mod simple_synth_struct;
+mod utils;
 
 impl Plugin for simple_synth_struct::SimpleSynth {
     type SysExMessage = ();
@@ -48,41 +47,56 @@ impl Plugin for simple_synth_struct::SimpleSynth {
         buffer_config: &BufferConfig,
         _context: &mut impl InitContext<Self>,
     ) -> bool {
-        self.sample_rate = buffer_config.sample_rate;
-        self.osc_sin = WaveformOscillator::new(
-            (-512..=512)
-                .map(|s| (s as f32 * std::f32::consts::PI / 512.0).sin())
-                .collect::<Vec<_>>(),
-            0.5,
+        self.sine_table = Arc::new(
+            (0..=1024)
+                .map(|s| (std::f32::consts::TAU * s as f32 / 1024 as f32).sin())
+                .collect(),
         );
-        self.osc_saw = WaveformOscillator::new(vec![-1.0, 1.0], 0.5);
-        self.amp_env = Adsr::new(0.5, 0.25, 1.0, 1.0);
+        self.sample_rate = buffer_config.sample_rate;
+        self.osc = (0..=5)
+            .into_iter()
+            .map(|s| SineOscillator::new(self.sine_table.clone(), (s % 2) as f32 / 2.0))
+            .collect();
+        self.amp_env = (0..=5)
+            .into_iter()
+            .map(|s| s as f32)
+            .map(|s| {
+                Adsr::new(
+                    s * 0.5,
+                    0.0,
+                    if s == 0.0 { 0.0 } else { -FRAC_2_PI / s },
+                    (5.0 - s) * 0.5,
+                )
+            })
+            .collect();
+
         self.osc_freq = 440.0;
-        self.amp_env.reset();
-        self.osc_sin.reset();
-        self.osc_saw.reset();
+
+        self.amp_env.iter_mut().for_each(|s| s.reset());
+        self.osc.iter_mut().for_each(|s| s.reset());
         true
     }
 
     fn process(
         &mut self,
         buffer: &mut Buffer,
-        _aux: &mut AuxiliaryBuffers, // aux не используется
+        _aux: &mut AuxiliaryBuffers,
         context: &mut impl ProcessContext<Self>,
     ) -> ProcessStatus {
         while let Some(event) = context.next_event() {
             match event {
                 NoteEvent::NoteOn { note, velocity, .. } => {
                     if velocity > 0.0 {
-                        self.active_note = Some(simple_synth_struct::ActiveNote { midi_note: note });
-                        self.amp_env.gate_on();
+                        self.active_note =
+                            Some(simple_synth_struct::ActiveNote { midi_note: note });
+                        self.amp_env.iter_mut().for_each(|s| s.gate_on());
                     }
                 }
                 NoteEvent::NoteOff { note, .. } => {
                     if let Some(active) = &self.active_note {
                         if active.midi_note == note {
                             self.active_note = None;
-                            self.amp_env.gate_off();
+                            self.amp_env.iter_mut().for_each(|s| s.gate_off());
                         }
                     }
                 }
@@ -100,24 +114,32 @@ impl Plugin for simple_synth_struct::SimpleSynth {
         let num_samples = buffer.samples();
 
         for sample_index in 0..num_samples {
-            let x_fader_ratio = self.params.osc_xfade.smoothed.next();
             let gain = util::db_to_gain(self.params.gain.smoothed.next());
-            for channels in buffer.as_slice() {
-                channels[sample_index] = utils::xfader(
-                    self.osc_sin.get_value(),
-                    self.osc_saw.get_value(),
-                    x_fader_ratio,
-                ) * self.amp_env.get_value()
-                    * gain;
-            }
-            self.amp_env.attack = self.params.amp_adsr_attack.smoothed.next();
-            self.amp_env.decay = self.params.amp_adsr_decay.smoothed.next();
-            self.amp_env.sustain = self.params.amp_adsr_sustain.smoothed.next() / 100.0;
-            self.amp_env.release = self.params.amp_adsr_release.smoothed.next();
 
-            self.amp_env.step(1.0 / self.sample_rate);
-            self.osc_sin.step(self.osc_freq / self.sample_rate);
-            self.osc_saw.step(self.osc_freq / self.sample_rate);
+            let mut out = self
+                .osc
+                .iter()
+                .map(|s| s.get_value())
+                .zip(self.amp_env.iter().map(|s| s.get_value()))
+                .map(|(osc, env)| osc * env)
+                .sum();
+
+            out *= gain;
+
+            for channels in buffer.as_slice() {
+                channels[sample_index] = out
+            }
+
+            let k = 1.0 / self.sample_rate;
+
+            self.amp_env.iter_mut().for_each(|s| s.step(k));
+
+            let k = self.osc_freq / self.sample_rate;
+
+            self.osc
+                .iter_mut()
+                .enumerate()
+                .for_each(|(index, s)| s.step(k * index as f32));
         }
 
         ProcessStatus::Normal
@@ -129,7 +151,7 @@ impl Plugin for simple_synth_struct::SimpleSynth {
 
 impl Vst3Plugin for simple_synth_struct::SimpleSynth {
     const VST3_CLASS_ID: [u8; 16] = [
-        98, 218, 94, 45, 78, 44, 74, 204, 167, 126, 143, 79, 37, 188, 237, 20,
+        98, 218, 94, 45, 255, 44, 74, 204, 167, 126, 143, 79, 37, 188, 237, 20,
     ];
     const VST3_SUBCATEGORIES: &'static [Vst3SubCategory] = &[Vst3SubCategory::Instrument];
 }

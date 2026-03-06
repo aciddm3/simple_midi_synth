@@ -14,6 +14,11 @@ pub struct ParamKnob<'a> {
 
 impl<'a> nih_plug_egui::egui::Widget for ParamKnob<'a> {
     fn ui(self, ui: &mut nih_plug_egui::egui::Ui) -> nih_plug_egui::egui::Response {
+        let desired_size = ui.available_size_before_wrap();
+        let (rect, response) =
+            ui.allocate_exact_size(desired_size, nih_plug_egui::egui::Sense::click_and_drag());
+
+
         let mut uv_value = match self.param.range() {
             FloatRange::Linear { min, max } => {
                 if max - min == 0.0 {
@@ -24,9 +29,10 @@ impl<'a> nih_plug_egui::egui::Widget for ParamKnob<'a> {
             }
             _ => 0.0,
         };
-        let desired_size = ui.available_size_before_wrap();
-        let (rect, response) =
-            ui.allocate_exact_size(desired_size, nih_plug_egui::egui::Sense::click_and_drag());
+
+        if response.double_clicked() {
+            uv_value = self.param.default_normalized_value();
+        }
 
         if ui.is_rect_visible(rect) {
             let knob_radius = rect.width().min(rect.height()) / 2.0;
@@ -49,7 +55,7 @@ impl<'a> nih_plug_egui::egui::Widget for ParamKnob<'a> {
             ];
 
             ui.painter()
-                .circle_stroke(center, knob_radius, Stroke::new(0.6, self.color));
+                .circle_stroke(center, 0.9 * knob_radius, Stroke::new(0.6, self.color));
             ui.painter()
                 .add(Shape::Path(nih_plug_egui::egui::epaint::PathShape {
                     points: stick_points,
@@ -71,13 +77,6 @@ impl<'a> nih_plug_egui::egui::Widget for ParamKnob<'a> {
         if response.dragged() {
             let delta_x = response.drag_delta().y;
             uv_value = (uv_value - delta_x * 0.01).clamp(0.0, 1.0);
-        }
-
-        if response.double_clicked() {
-            self.setter.begin_set_parameter(self.param);
-            self.setter
-                .set_parameter(self.param, self.param.default_plain_value());
-            self.setter.end_set_parameter(self.param);
         }
 
         self.setter.begin_set_parameter(self.param);

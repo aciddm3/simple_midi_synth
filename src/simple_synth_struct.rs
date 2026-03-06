@@ -7,30 +7,30 @@ pub struct ActiveNote {
 }
 
 pub struct SimpleSynth {
+    pub sine_table: Arc<Vec<f32>>,
     pub params: Arc<SimpleSynthParams>,
     pub active_note: Option<ActiveNote>,
     pub sample_rate: f32,
-    pub amp_env: Adsr,
-    pub osc_sin: WaveformOscillator,
-    pub osc_saw: WaveformOscillator,
+    pub amp_env: Vec<Adsr>,
+    pub osc: Vec<SineOscillator>,
     pub osc_freq: f32,
     pub editor_state: Arc<EguiState>,
 }
 
 impl Default for SimpleSynth {
     fn default() -> Self {
+        let sine_table: Arc<Vec<f32>> = Arc::new(
+            (-512..=512)
+                .map(|s| (std::f32::consts::PI * s as f32 / 512.0).sin())
+                .collect(),
+        );
         Self {
+            sine_table: sine_table.clone(),
             params: Arc::new(SimpleSynthParams::default()),
             active_note: None,
             sample_rate: 44100.0,
-            amp_env: Adsr::new(0.5, 0.25, 1.0, 1.0),
-            osc_sin: WaveformOscillator::new(
-                (-512..=512)
-                    .map(|s| (std::f32::consts::PI * s as f32 / 512.0).sin())
-                    .collect(),
-                0.5,
-            ),
-            osc_saw: WaveformOscillator::new(vec![-1.0, 1.0], 0.5),
+            amp_env: vec![Adsr::new(0.5, 0.25, 1.0, 1.0)],
+            osc: vec![SineOscillator::new(sine_table.clone(), 0.0)],
             osc_freq: 440.0,
             editor_state: EguiState::from_size(600, 200),
         }
