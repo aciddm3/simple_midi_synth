@@ -1,8 +1,10 @@
 use nih_plug::prelude::*;
-use std::{f32::consts::FRAC_2_PI, sync::Arc};
+use std::sync::Arc;
 
-use crate::{adsr::Adsr, oscillator::SineOscillator};
+use crate::background_tasks::TaskExec;
+
 mod adsr;
+mod background_tasks;
 mod gui;
 mod oscillator;
 mod simple_synth_parameters;
@@ -11,8 +13,8 @@ mod utils;
 
 impl Plugin for simple_synth_struct::SimpleSynth {
     type SysExMessage = ();
-    type BackgroundTask = ();
-    const NAME: &'static str = "Simple Monophonic Synth";
+    type BackgroundTask = background_tasks::BackgroundTasks;
+    const NAME: &'static str = "aciddm Experemental Synth";
     const VENDOR: &'static str = "Gemma";
     const URL: &'static str = env!("CARGO_PKG_HOMEPAGE");
     const EMAIL: &'static str = env!("CARGO_PKG_AUTHORS");
@@ -45,7 +47,7 @@ impl Plugin for simple_synth_struct::SimpleSynth {
         &mut self,
         _audio_io_layout: &AudioIOLayout,
         buffer_config: &BufferConfig,
-        _context: &mut impl InitContext<Self>,
+        context: &mut impl InitContext<Self>,
     ) -> bool {
         self.sine_table = Arc::new(
             (0..=1024)
@@ -53,27 +55,12 @@ impl Plugin for simple_synth_struct::SimpleSynth {
                 .collect(),
         );
         self.sample_rate = buffer_config.sample_rate;
-        self.osc = (0..=5)
-            .into_iter()
-            .map(|s| SineOscillator::new(self.sine_table.clone(), (s % 2) as f32 / 2.0))
-            .collect();
-        self.amp_env = (0..=5)
-            .into_iter()
-            .map(|s| s as f32)
-            .map(|s| {
-                Adsr::new(
-                    s * 0.5,
-                    0.0,
-                    if s == 0.0 { 0.0 } else { -FRAC_2_PI / s },
-                    (5.0 - s) * 0.5,
-                )
-            })
-            .collect();
-
         self.osc_freq = 440.0;
 
-        self.amp_env.iter_mut().for_each(|s| s.reset());
-        self.osc.iter_mut().for_each(|s| s.reset());
+        context.execute(background_tasks::BackgroundTasks::OpenFileNoDialog);
+
+        self.amp_env.write().iter_mut().for_each(|s| s.reset());
+        self.osc.write().iter_mut().for_each(|s| s.reset());
         true
     }
 
@@ -89,14 +76,14 @@ impl Plugin for simple_synth_struct::SimpleSynth {
                     if velocity > 0.0 {
                         self.active_note =
                             Some(simple_synth_struct::ActiveNote { midi_note: note });
-                        self.amp_env.iter_mut().for_each(|s| s.gate_on());
+                        self.amp_env.write().iter_mut().for_each(|s| s.gate_on());
                     }
                 }
                 NoteEvent::NoteOff { note, .. } => {
                     if let Some(active) = &self.active_note {
                         if active.midi_note == note {
                             self.active_note = None;
-                            self.amp_env.iter_mut().for_each(|s| s.gate_off());
+                            self.amp_env.write().iter_mut().for_each(|s| s.gate_off());
                         }
                     }
                 }
@@ -118,9 +105,10 @@ impl Plugin for simple_synth_struct::SimpleSynth {
 
             let mut out = self
                 .osc
+                .read()
                 .iter()
                 .map(|s| s.get_value())
-                .zip(self.amp_env.iter().map(|s| s.get_value()))
+                .zip(self.amp_env.read().iter().map(|s| s.get_value()))
                 .map(|(osc, env)| osc * env)
                 .sum();
 
@@ -132,11 +120,12 @@ impl Plugin for simple_synth_struct::SimpleSynth {
 
             let k = 1.0 / self.sample_rate;
 
-            self.amp_env.iter_mut().for_each(|s| s.step(k));
+            self.amp_env.write().iter_mut().for_each(|s| s.step(k));
 
             let k = self.osc_freq / self.sample_rate;
 
             self.osc
+                .write()
                 .iter_mut()
                 .enumerate()
                 .for_each(|(index, s)| s.step(k * index as f32));
@@ -146,6 +135,10 @@ impl Plugin for simple_synth_struct::SimpleSynth {
     }
     fn editor(&mut self, async_executor: AsyncExecutor<Self>) -> Option<Box<dyn Editor>> {
         self.make_gui(async_executor)
+    }
+
+    fn task_executor(&mut self) -> TaskExecutor<Self> {
+        self.task_exec()
     }
 }
 

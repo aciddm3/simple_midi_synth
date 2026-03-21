@@ -1,7 +1,9 @@
 use crate::simple_synth_parameters::SimpleSynthParams;
 use crate::{adsr::*, oscillator::*};
 use nih_plug_egui::EguiState;
+use parking_lot::RwLock;
 use std::sync::Arc;
+
 pub struct ActiveNote {
     pub midi_note: u8,
 }
@@ -11,8 +13,8 @@ pub struct SimpleSynth {
     pub params: Arc<SimpleSynthParams>,
     pub active_note: Option<ActiveNote>,
     pub sample_rate: f32,
-    pub amp_env: Vec<Adsr>,
-    pub osc: Vec<SineOscillator>,
+    pub amp_env: Arc<RwLock<Vec<Adsr>>>,
+    pub osc: Arc<RwLock<Vec<SineOscillator>>>,
     pub osc_freq: f32,
     pub editor_state: Arc<EguiState>,
 }
@@ -29,8 +31,11 @@ impl Default for SimpleSynth {
             params: Arc::new(SimpleSynthParams::default()),
             active_note: None,
             sample_rate: 44100.0,
-            amp_env: vec![Adsr::new(0.5, 0.25, 1.0, 1.0)],
-            osc: vec![SineOscillator::new(sine_table.clone(), 0.0)],
+            amp_env: Arc::new(RwLock::new(vec![Adsr::new(0.5, 0.25, 1.0, 1.0)])),
+            osc: Arc::new(RwLock::new(vec![SineOscillator::new(
+                sine_table.clone(),
+                0.0,
+            )])),
             osc_freq: 440.0,
             editor_state: EguiState::from_size(600, 200),
         }

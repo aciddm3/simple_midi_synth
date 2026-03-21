@@ -3,15 +3,18 @@ mod knob;
 use nih_plug::prelude::*;
 use nih_plug_egui::{
     create_egui_editor,
-    egui::{self, Color32, vec2},
+    egui::{self, Button, Color32, vec2},
     widgets,
 };
 
-use crate::{gui::knob::param_knob::ParamKnob, simple_synth_struct::SimpleSynth};
+use crate::{
+    background_tasks::BackgroundTasks, gui::knob::param_knob::ParamKnob,
+    simple_synth_struct::SimpleSynth,
+};
 
 impl SimpleSynth {
     #[inline]
-    pub fn make_gui(&mut self, _async_executor: AsyncExecutor<Self>) -> Option<Box<dyn Editor>> {
+    pub fn make_gui(&mut self, async_executor: AsyncExecutor<Self>) -> Option<Box<dyn Editor>> {
         let params = self.params.clone();
 
         create_egui_editor(
@@ -42,6 +45,16 @@ impl SimpleSynth {
                             });
                             ui.label("Transpose");
                             ui.add(widgets::ParamSlider::for_param(&params.transpose, setter));
+
+                            let response = ui.add(Button::new("Load File"));
+
+                            if response.clicked() {
+                                async_executor.execute_background(BackgroundTasks::OpenFileDialog);
+                            }
+
+                            let path_guard = params.file_path.read();
+                            let filename: &str = path_guard.as_deref().unwrap_or("None");
+                            ui.label(format!("File loaded : {filename}"));
                         });
                     })
                 });

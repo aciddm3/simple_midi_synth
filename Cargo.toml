@@ -15,3 +15,6 @@ members = [
 nih_plug = { git = "https://github.com/robbert-vdh/nih-plug", features = ["vst3"] }
 nih_plug_egui = { git = "https://github.com/robbert-vdh/nih-plug" }
 nih_plug_derive = { git = "https://github.com/robbert-vdh/nih-plug" }
+parking_lot = "0.12.5"
+rfd = "0.17.2"
+serde_json = "1.0.149"
