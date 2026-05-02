@@ -34,7 +34,7 @@ impl Tembroblock {
     pub fn do_dt(&mut self, dt_osc: f32, dt_env: f32) -> f32 {
         self.value = self.amplitude_envelope.do_dt(dt_env)
             * self.oscillator.do_dt(
-                dt_osc * self.pitch_envelope.do_dt(dt_env) * 20000.0
+                dt_osc * 2.0f32.powf(self.pitch_envelope.do_dt(dt_env))
                     + self.phase_envelope.do_dt(dt_env),
             );
         self.value

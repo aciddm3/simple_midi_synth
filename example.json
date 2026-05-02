@@ -1,24 +1,24 @@
 [
-  {
-    "pitch_gate_on": "(linear (sin arg) 0.5 0.5)",
-    "pitch_gate_off": "(exp (neg arg))",
+  	{
+    "pitch_gate_on": "(* (sin arg) (const-mul (exp (const-mul arg -4.0)) 1))",
+    "pitch_gate_off": "0.0",
 	"pitch_slew_limit" : 1.0,
     "phase_gate_on": "0.0",
     "phase_gate_off": "0.0",
 	"phase_slew_limit" : 1.0,
 	"amplitude_gate_on": "(sigmoid arg)",
-    "amplitude_gate_off": "(exp (neg arg))",
-	"amplitude_slew_limit" : 1.0
-},
-{
-	"pitch_gate_on": "(const-mul (sin arg) 2.0)",
-    "pitch_gate_off": "(exp (neg arg))",
+    "amplitude_gate_off": "(exp (const-mul arg -4.0))",
+	"amplitude_slew_limit" : 0.1
+	},
+	{
+    "pitch_gate_on": "(* (sin (linear arg 1.0 -1.57075)) (const-mul (exp (const-mul arg -4.0)) 2))",
+    "pitch_gate_off": "0.0",
 	"pitch_slew_limit" : 1.0,
     "phase_gate_on": "0.0",
     "phase_gate_off": "0.0",
 	"phase_slew_limit" : 1.0,
-    "amplitude_gate_on": "(sigmoid arg)",
-    "amplitude_gate_off": "(exp (neg arg))",
-	"amplitude_slew_limit" : 1.0
-  }
+	"amplitude_gate_on": "(const-mul (sigmoid arg) 0.5)",
+    "amplitude_gate_off": "(const-mul (exp (const-mul arg -4.0)) 0.5)",
+	"amplitude_slew_limit" : 0.1
+	}
 ]

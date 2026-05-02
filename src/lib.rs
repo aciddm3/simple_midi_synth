@@ -13,7 +13,7 @@ mod utils;
 impl Plugin for simple_synth_struct::SimpleSynth {
     type SysExMessage = ();
     type BackgroundTask = background_tasks::BackgroundTasks;
-    const NAME: &'static str = "aciddm Experemental Synth";
+    const NAME: &'static str = "aciddm daleth";
     const VENDOR: &'static str = "Gemma";
     const URL: &'static str = env!("CARGO_PKG_HOMEPAGE");
     const EMAIL: &'static str = env!("CARGO_PKG_AUTHORS");
