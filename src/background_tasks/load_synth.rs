@@ -1,38 +1,57 @@
-use std::{error::Error, fs};
+use serde::Deserialize;
+use std::error::Error;
+use std::fs;
+use std::path::Path;
 
-use serde_json::{Value, from_str};
+use crate::tembroblock::common_envelope::CommonEnvelope;
+use aciddm3_atom_func::parser::parse_func;
 
-use crate::{adsr::Adsr, oscillator::SineOscillator};
+#[derive(Deserialize)]
+struct RawPreset {
+    pitch_gate_on: String,
+    pitch_gate_off: String,
+    pitch_slew_limit: f32,
 
-pub fn load_synth(
-    path: &String,
-    func: std::sync::Arc<Vec<f32>>,
-) -> Result<(Vec<SineOscillator>, Vec<Adsr>), Box<dyn Error>> {
-    let string = fs::read_to_string(path)?;
-    match from_str::<Value>(string.as_str()) {
-        Err(e) => {
-            Err(Box::new(e))
-        }
-        Ok(val) => {
-            let Some(arr) = val.as_array() else {
-                eprintln!("Incorrect JSON");
-                return Ok((
-                    vec![SineOscillator::new(func.clone(), 0.0); 2],
-                    vec![Adsr::new(0.0, 0.0, 1.0, 0.0); 2],
-                ));
-            };
-            let size = arr.len();
-            let mut res_amp = Vec::with_capacity(size);
-            for val in arr {
-                let adsr = Adsr::new(
-                    val["attack"].as_f64().unwrap_or(1.0) as f32,
-                    val["decay"].as_f64().unwrap_or(1.0) as f32,
-                    val["sustain"].as_f64().unwrap_or(1.0) as f32,
-                    val["release"].as_f64().unwrap_or(1.0) as f32,
-                );
-                res_amp.push(adsr);
-            }
-            Ok((vec![SineOscillator::new(func.clone(), 0.0); size], res_amp))
-        }
+    phase_gate_on: String,
+    phase_gate_off: String,
+    phase_slew_limit: f32,
+
+    amplitude_gate_on: String,
+    amplitude_gate_off: String,
+    amplitude_slew_limit: f32,
+}
+
+pub fn load_synth<P: AsRef<Path>>(
+    path: P,
+) -> Result<Vec<(CommonEnvelope, CommonEnvelope, CommonEnvelope)>, Box<dyn Error>> {
+    let content = fs::read_to_string(&path)?;
+
+    let raw_presets: Vec<RawPreset> = serde_json::from_str(&content)?;
+
+    let mut result = Vec::with_capacity(raw_presets.len());
+
+    for raw in raw_presets {
+        
+        let pitch = CommonEnvelope::new(
+            parse_func(&raw.pitch_gate_on)?,
+            parse_func(&raw.pitch_gate_off)?,
+            raw.pitch_slew_limit,
+        );
+
+        let phase = CommonEnvelope::new(
+            parse_func(&raw.phase_gate_on)?,
+            parse_func(&raw.phase_gate_off)?,
+            raw.phase_slew_limit,
+        );
+
+        let amplitude = CommonEnvelope::new(
+            parse_func(&raw.amplitude_gate_on)?,
+            parse_func(&raw.amplitude_gate_off)?,
+            raw.amplitude_slew_limit,
+        );
+
+        result.push((pitch, phase, amplitude));
     }
+
+    Ok(result)
 }

@@ -19,14 +19,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "366ffbaa4442f4684d91e2cd7c5ea7c4ed8add41959a31447066e279e432b618"
 
 [[package]]
-name = "aciddm3_experemental_monophonic_synth"
+name = "aciddm3_atom_func"
+version = "0.1.0"
+source = "git+https://github.com/aciddm3/atom_func.git#23b380c62985b124a44649f38e45ad399acf8127"
+
+[[package]]
+name = "aciddm3_daleth"
 version = "0.1.0"
 dependencies = [
+ "aciddm3_atom_func",
  "nih_plug",
  "nih_plug_derive",
  "nih_plug_egui",
  "parking_lot",
  "rfd",
+ "serde",
  "serde_json",
 ]
 

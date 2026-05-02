@@ -3,12 +3,11 @@ use std::sync::Arc;
 
 use crate::background_tasks::TaskExec;
 
-mod adsr;
 mod background_tasks;
 mod gui;
-mod oscillator;
 mod simple_synth_parameters;
 mod simple_synth_struct;
+mod tembroblock;
 mod utils;
 
 impl Plugin for simple_synth_struct::SimpleSynth {
@@ -55,12 +54,11 @@ impl Plugin for simple_synth_struct::SimpleSynth {
                 .collect(),
         );
         self.sample_rate = buffer_config.sample_rate;
-        self.osc_freq = 440.0;
+        self.master_freq = 440.0;
 
         context.execute(background_tasks::BackgroundTasks::OpenFileNoDialog);
 
-        self.amp_env.write().iter_mut().for_each(|s| s.reset());
-        self.osc.write().iter_mut().for_each(|s| s.reset());
+        self.tembroblocks.write().iter_mut().for_each(|s| s.reset());
         true
     }
 
@@ -76,14 +74,20 @@ impl Plugin for simple_synth_struct::SimpleSynth {
                     if velocity > 0.0 {
                         self.active_note =
                             Some(simple_synth_struct::ActiveNote { midi_note: note });
-                        self.amp_env.write().iter_mut().for_each(|s| s.gate_on());
+                        self.tembroblocks
+                            .write()
+                            .iter_mut()
+                            .for_each(|s| s.gate_on());
                     }
                 }
                 NoteEvent::NoteOff { note, .. } => {
                     if let Some(active) = &self.active_note {
                         if active.midi_note == note {
                             self.active_note = None;
-                            self.amp_env.write().iter_mut().for_each(|s| s.gate_off());
+                            self.tembroblocks
+                                .write()
+                                .iter_mut()
+                                .for_each(|s| s.gate_off());
                         }
                     }
                 }
@@ -92,7 +96,7 @@ impl Plugin for simple_synth_struct::SimpleSynth {
         }
 
         if let Some(simple_synth_struct::ActiveNote { midi_note }) = &mut self.active_note {
-            self.osc_freq = utils::note_to_freq(
+            self.master_freq = utils::note_to_freq(
                 (*midi_note as i32 + self.params.transpose.value()) as f32,
                 440.0,
             );
@@ -103,14 +107,7 @@ impl Plugin for simple_synth_struct::SimpleSynth {
         for sample_index in 0..num_samples {
             let gain = util::db_to_gain(self.params.gain.smoothed.next());
 
-            let mut out = self
-                .osc
-                .read()
-                .iter()
-                .map(|s| s.get_value())
-                .zip(self.amp_env.read().iter().map(|s| s.get_value()))
-                .map(|(osc, env)| osc * env)
-                .sum();
+            let mut out = self.tembroblocks.read().iter().map(|s| s.get_value()).sum();
 
             out *= gain;
 
@@ -118,17 +115,13 @@ impl Plugin for simple_synth_struct::SimpleSynth {
                 channels[sample_index] = out
             }
 
-            let k = 1.0 / self.sample_rate;
+            let dt_env = 1.0 / self.sample_rate;
 
-            self.amp_env.write().iter_mut().for_each(|s| s.step(k));
+            let dt_osc = self.master_freq / self.sample_rate;
 
-            let k = self.osc_freq / self.sample_rate;
-
-            self.osc
-                .write()
-                .iter_mut()
-                .enumerate()
-                .for_each(|(index, s)| s.step(k * index as f32));
+            self.tembroblocks.write().iter_mut().for_each(|s| {
+                s.do_dt(dt_osc, dt_env);
+            });
         }
 
         ProcessStatus::Normal

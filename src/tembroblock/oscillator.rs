@@ -3,31 +3,26 @@ use std::sync::Arc;
 #[derive(Debug, Clone)]
 pub struct SineOscillator {
     pub func: Arc<Vec<f32>>,
-    pub phase_offset: f32,
     position: f32,
     current_value: f32,
 }
 
 impl SineOscillator {
-    pub fn step(&mut self, step: f32) {
-        self.position = (self.position + step).rem_euclid(1.0);
+    pub fn do_dt(&mut self, dt: f32) -> f32 {
+        self.position = (self.position + dt).rem_euclid(1.0);
         self.current_value = func_from_vec(self.func.clone(), self.position);
-    }
-
-    pub fn reset(&mut self) {
-        self.position = self.phase_offset;
-        self.current_value = func_from_vec(self.func.clone(), self.position);
-    }
-
-    pub fn get_value(&self) -> f32 {
         self.current_value
     }
 
-    pub fn new(func: Arc<Vec<f32>>, phase_offset: f32) -> Self {
+    pub fn reset(&mut self) {
+        self.position = 0.0;
+        self.current_value = func_from_vec(self.func.clone(), self.position);
+    }
+
+    pub fn new(func: Arc<Vec<f32>>) -> Self {
         Self {
-            current_value: func_from_vec(func.clone(), phase_offset),
-            phase_offset,
-            position: phase_offset,
+            current_value: func_from_vec(func.clone(), 0.0),
+            position: 0.0,
             func,
         }
     }
