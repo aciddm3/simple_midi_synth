@@ -1,22 +1,24 @@
 [package]
 name = "aciddm3_daleth"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 
 [lib]
 crate-type = ["cdylib"]
 
 [workspace]
-members = [
-    "xtask"
-]
+members = ["xtask"]
 
 [dependencies]
-nih_plug = { git = "https://github.com/robbert-vdh/nih-plug", features = ["vst3"] }
+aciddm3_atom_func = { git = "https://github.com/aciddm3/atom_func.git", features = [
+    "sexpr_parser",
+] }
+nih_plug = { git = "https://github.com/robbert-vdh/nih-plug", features = [
+    "vst3",
+] }
 nih_plug_egui = { git = "https://github.com/robbert-vdh/nih-plug" }
 nih_plug_derive = { git = "https://github.com/robbert-vdh/nih-plug" }
 parking_lot = "0.12.5"
 rfd = "0.17.2"
 serde_json = "1.0.149"
-aciddm3_atom_func = { git = "https://github.com/aciddm3/atom_func.git", features = ["sexpr_parser"]}
 serde = "1.0.228"

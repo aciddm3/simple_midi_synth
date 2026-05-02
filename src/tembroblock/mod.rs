@@ -21,22 +21,24 @@ impl Tembroblock {
         phase_envelope: CommonEnvelope,
         pitch_envelope: CommonEnvelope,
     ) -> Self {
-		Self {
-			oscillator,
-			amplitude_envelope,
-			phase_envelope,
-			pitch_envelope,
-			value : 0.0,
-		}
-	}
+        Self {
+            oscillator,
+            amplitude_envelope,
+            phase_envelope,
+            pitch_envelope,
+            value: 0.0,
+        }
+    }
 
     #[inline]
     pub fn do_dt(&mut self, dt_osc: f32, dt_env: f32) -> f32 {
+        self.oscillator.set_phase(self.phase_envelope.do_dt(dt_env));
+        
         self.value = self.amplitude_envelope.do_dt(dt_env)
-            * self.oscillator.do_dt(
-                dt_osc * 2.0f32.powf(self.pitch_envelope.do_dt(dt_env))
-                    + self.phase_envelope.do_dt(dt_env),
-            );
+            * self
+                .oscillator
+                .do_dt(dt_osc * 2.0f32.powf(self.pitch_envelope.do_dt(dt_env)));
+
         self.value
     }
 

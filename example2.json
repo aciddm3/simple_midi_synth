@@ -1,0 +1,13 @@
+[
+    {
+    "pitch_gate_on": "(exp (const-mul arg -4.0))",
+    "pitch_gate_off": "0.0",
+	"pitch_slew_limit" : 1.0,
+    "phase_gate_on": "0.5",
+    "phase_gate_off": "0.5",
+	"phase_slew_limit" : 1.0,
+	"amplitude_gate_on": "(sigmoid arg)",
+    "amplitude_gate_off": "(exp (const-mul arg -4.0))",
+	"amplitude_slew_limit" : 0.1
+	}
+]

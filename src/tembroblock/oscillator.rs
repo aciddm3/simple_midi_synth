@@ -5,6 +5,7 @@ pub struct SineOscillator {
     pub func: Arc<Vec<f32>>,
     position: f32,
     current_value: f32,
+    curr_phase : f32,
 }
 
 impl SineOscillator {
@@ -24,7 +25,13 @@ impl SineOscillator {
             current_value: func_from_vec(func.clone(), 0.0),
             position: 0.0,
             func,
+            curr_phase : 0.0
         }
+    }
+
+    pub fn set_phase (&mut self, new_phase : f32) {
+        self.position += new_phase - self.curr_phase;
+        self.curr_phase = new_phase
     }
 }
 
