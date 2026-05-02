@@ -31,22 +31,45 @@ pub fn load_synth<P: AsRef<Path>>(
     let mut result = Vec::with_capacity(raw_presets.len());
 
     for raw in raw_presets {
-        
         let pitch = CommonEnvelope::new(
-            parse_func(&raw.pitch_gate_on)?,
-            parse_func(&raw.pitch_gate_off)?,
+            {
+                let mut res = parse_func(&raw.pitch_gate_on)?;
+                res.simplify();
+                res
+            },
+            {
+                let mut res = parse_func(&raw.pitch_gate_off)?;
+                res.simplify();
+                res
+            },
             raw.pitch_slew_limit,
         );
 
         let phase = CommonEnvelope::new(
-            parse_func(&raw.phase_gate_on)?,
-            parse_func(&raw.phase_gate_off)?,
+            {
+                let mut res = parse_func(&raw.phase_gate_on)?;
+                res.simplify();
+                res
+            },
+            {
+                let mut res = parse_func(&raw.phase_gate_off)?;
+                res.simplify();
+                res
+            },
             raw.phase_slew_limit,
         );
 
         let amplitude = CommonEnvelope::new(
-            parse_func(&raw.amplitude_gate_on)?,
-            parse_func(&raw.amplitude_gate_off)?,
+            {
+                let mut res = parse_func(&raw.amplitude_gate_on)?;
+                res.simplify();
+                res
+            },
+            {
+                let mut res = parse_func(&raw.amplitude_gate_off)?;
+                res.simplify();
+                res
+            },
             raw.amplitude_slew_limit,
         );
 
