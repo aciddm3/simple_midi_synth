@@ -6,6 +6,8 @@ use std::path::Path;
 use crate::tembroblock::common_envelope::CommonEnvelope;
 use aciddm3_atom_func::parser::parse_func;
 
+const SIMPLE_DEPTH : usize = 256;
+
 #[derive(Deserialize)]
 struct RawPreset {
     pitch_gate_on: String,
@@ -34,12 +36,12 @@ pub fn load_synth<P: AsRef<Path>>(
         let pitch = CommonEnvelope::new(
             {
                 let mut res = parse_func(&raw.pitch_gate_on)?;
-                res.simplify();
+                res.simplify::<SIMPLE_DEPTH>();
                 res
             },
             {
                 let mut res = parse_func(&raw.pitch_gate_off)?;
-                res.simplify();
+                res.simplify::<SIMPLE_DEPTH>();
                 res
             },
             raw.pitch_slew_limit,
@@ -48,12 +50,12 @@ pub fn load_synth<P: AsRef<Path>>(
         let phase = CommonEnvelope::new(
             {
                 let mut res = parse_func(&raw.phase_gate_on)?;
-                res.simplify();
+                res.simplify::<SIMPLE_DEPTH>();
                 res
             },
             {
                 let mut res = parse_func(&raw.phase_gate_off)?;
-                res.simplify();
+                res.simplify::<SIMPLE_DEPTH>();
                 res
             },
             raw.phase_slew_limit,
@@ -62,12 +64,12 @@ pub fn load_synth<P: AsRef<Path>>(
         let amplitude = CommonEnvelope::new(
             {
                 let mut res = parse_func(&raw.amplitude_gate_on)?;
-                res.simplify();
+                res.simplify::<SIMPLE_DEPTH>();
                 res
             },
             {
                 let mut res = parse_func(&raw.amplitude_gate_off)?;
-                res.simplify();
+                res.simplify::<SIMPLE_DEPTH>();
                 res
             },
             raw.amplitude_slew_limit,

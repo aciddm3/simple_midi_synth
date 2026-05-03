@@ -11,7 +11,7 @@ members = ["xtask"]
 
 [dependencies]
 aciddm3_atom_func = { git = "https://github.com/aciddm3/atom_func.git", features = [
-    "sexpr_parser",
+    "sexpr_parser", "simplifier"
 ] }
 nih_plug = { git = "https://github.com/robbert-vdh/nih-plug", features = [
     "vst3",
