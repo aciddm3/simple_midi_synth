@@ -1,0 +1,112 @@
+[
+  {
+    "pitch_gate_on": "0.0",
+    "pitch_gate_off": "0.0",
+    "pitch_slew_limit": 3.4028235e38,
+    "phase_gate_on": "0.0",
+    "phase_gate_off": "0.0",
+    "phase_slew_limit": 3.4028235e38,
+    "amplitude_gate_on": "1.0",
+    "amplitude_gate_off": "0.0",
+    "amplitude_slew_limit": 3.4028235e38
+  },
+  {
+    "pitch_gate_on": "1.0",
+    "pitch_gate_off": "0.0",
+    "pitch_slew_limit": 3.4028235e38,
+    "phase_gate_on": "0.0",
+    "phase_gate_off": "0.0",
+    "phase_slew_limit": 3.4028235e38,
+    "amplitude_gate_on": "0.5",
+    "amplitude_gate_off": "0.0",
+    "amplitude_slew_limit": 3.4028235e38
+  },
+  {
+    "pitch_gate_on": "1.58496",
+    "pitch_gate_off": "0.0",
+    "pitch_slew_limit": 3.4028235e38,
+    "phase_gate_on": "0.0",
+    "phase_gate_off": "0.0",
+    "phase_slew_limit": 3.4028235e38,
+    "amplitude_gate_on": "0.333333",
+    "amplitude_gate_off": "0.0",
+    "amplitude_slew_limit": 3.4028235e38
+  },
+  {
+    "pitch_gate_on": "2.0",
+    "pitch_gate_off": "0.0",
+    "pitch_slew_limit": 3.4028235e38,
+    "phase_gate_on": "0.0",
+    "phase_gate_off": "0.0",
+    "phase_slew_limit": 3.4028235e38,
+    "amplitude_gate_on": "0.25",
+    "amplitude_gate_off": "0.0",
+    "amplitude_slew_limit": 3.4028235e38
+  },
+  {
+    "pitch_gate_on": "2.32193",
+    "pitch_gate_off": "0.0",
+    "pitch_slew_limit": 3.4028235e38,
+    "phase_gate_on": "0.0",
+    "phase_gate_off": "0.0",
+    "phase_slew_limit": 3.4028235e38,
+    "amplitude_gate_on": "0.2",
+    "amplitude_gate_off": "0.0",
+    "amplitude_slew_limit": 3.4028235e38
+  },
+  {
+    "pitch_gate_on": "2.58496",
+    "pitch_gate_off": "0.0",
+    "pitch_slew_limit": 3.4028235e38,
+    "phase_gate_on": "0.0",
+    "phase_gate_off": "0.0",
+    "phase_slew_limit": 3.4028235e38,
+    "amplitude_gate_on": "0.166666",
+    "amplitude_gate_off": "0.0",
+    "amplitude_slew_limit": 3.4028235e38
+  },
+  {
+    "pitch_gate_on": "2.80735",
+    "pitch_gate_off": "0.0",
+    "pitch_slew_limit": 3.4028235e38,
+    "phase_gate_on": "0.0",
+    "phase_gate_off": "0.0",
+    "phase_slew_limit": 3.4028235e38,
+    "amplitude_gate_on": "0.142857",
+    "amplitude_gate_off": "0.0",
+    "amplitude_slew_limit": 3.4028235e38
+  },
+  {
+    "pitch_gate_on": "3.0",
+    "pitch_gate_off": "0.0",
+    "pitch_slew_limit": 3.4028235e38,
+    "phase_gate_on": "0.0",
+    "phase_gate_off": "0.0",
+    "phase_slew_limit": 3.4028235e38,
+    "amplitude_gate_on": "0.125",
+    "amplitude_gate_off": "0.0",
+    "amplitude_slew_limit": 3.4028235e38
+  },
+  {
+    "pitch_gate_on": "3.16993",
+    "pitch_gate_off": "0.0",
+    "pitch_slew_limit": 3.4028235e38,
+    "phase_gate_on": "0.0",
+    "phase_gate_off": "0.0",
+    "phase_slew_limit": 3.4028235e38,
+    "amplitude_gate_on": "0.111111",
+    "amplitude_gate_off": "0.0",
+    "amplitude_slew_limit": 3.4028235e38
+  },
+  {
+    "pitch_gate_on": "3.32193",
+    "pitch_gate_off": "0.0",
+    "pitch_slew_limit": 3.4028235e38,
+    "phase_gate_on": "0.0",
+    "phase_gate_off": "0.0",
+    "phase_slew_limit": 3.4028235e38,
+    "amplitude_gate_on": "0.1",
+    "amplitude_gate_off": "0.0",
+    "amplitude_slew_limit": 3.4028235e38
+  }
+]
