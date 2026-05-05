@@ -2,6 +2,7 @@ use crate::simple_synth_parameters::SimpleSynthParams;
 use crate::tembroblock::Tembroblock;
 use crate::tembroblock::common_envelope::CommonEnvelope;
 use crate::tembroblock::oscillator::SineOscillator;
+
 use nih_plug_egui::EguiState;
 use parking_lot::RwLock;
 use std::sync::Arc;
@@ -18,7 +19,7 @@ pub struct SimpleSynth {
     pub sample_rate: f32,
     pub master_freq: f32,
     pub editor_state: Arc<EguiState>,
-}
+    }
 
 impl Default for SimpleSynth {
     fn default() -> Self {
@@ -37,6 +38,7 @@ impl Default for SimpleSynth {
                 CommonEnvelope::default(),
                 CommonEnvelope::default(),
                 CommonEnvelope::default(),
+                44100.0
             )])),
             master_freq: 440.0,
             editor_state: EguiState::from_size(600, 200),
@@ -44,7 +46,7 @@ impl Default for SimpleSynth {
     }
 }
 
-impl ToString for ActiveNote {
+/*impl ToString for ActiveNote {
     fn to_string(&self) -> String {
         let (note, oct) = (self.midi_note % 12, self.midi_note / 12);
         let note = match note {
@@ -66,3 +68,4 @@ impl ToString for ActiveNote {
         format!("{note}{}", oct as i8 - 1)
     }
 }
+*/

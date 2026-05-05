@@ -50,12 +50,11 @@ impl Plugin for simple_synth_struct::SimpleSynth {
     ) -> bool {
         self.sine_table = Arc::new(
             (0..=1024)
-                .map(|s| (std::f32::consts::TAU * s as f32 / 1024 as f32).sin())
+                .map(|s| (std::f32::consts::TAU * s as f32 / 1024_f32).sin())
                 .collect(),
         );
         self.sample_rate = buffer_config.sample_rate;
         self.master_freq = 440.0;
-
         context.execute(background_tasks::BackgroundTasks::OpenFileNoDialog);
 
         self.tembroblocks.write().iter_mut().for_each(|s| s.reset());
@@ -81,14 +80,14 @@ impl Plugin for simple_synth_struct::SimpleSynth {
                     }
                 }
                 NoteEvent::NoteOff { note, .. } => {
-                    if let Some(active) = &self.active_note {
-                        if active.midi_note == note {
-                            self.active_note = None;
-                            self.tembroblocks
-                                .write()
-                                .iter_mut()
-                                .for_each(|s| s.gate_off());
-                        }
+                    if let Some(active) = &self.active_note
+                        && active.midi_note == note
+                    {
+                        self.active_note = None;
+                        self.tembroblocks
+                            .write()
+                            .iter_mut()
+                            .for_each(|s| s.gate_off());
                     }
                 }
                 _ => (),
@@ -106,22 +105,23 @@ impl Plugin for simple_synth_struct::SimpleSynth {
 
         for sample_index in 0..num_samples {
             let gain = util::db_to_gain(self.params.gain.smoothed.next());
+            let dt_osc = self.master_freq / self.sample_rate;
+            let dt_env = 1.0 / self.sample_rate;
 
-            let mut out = self.tembroblocks.read().iter().map(|s| s.get_value()).sum();
-
-            out *= gain;
+            let mut out;
+            {
+                let mut tembroblocks_guard = self.tembroblocks.write();
+                // полностью забираем себе tembroblocks
+                out = tembroblocks_guard.iter().map(|s| s.get_value()).sum();
+                out *= gain;
+                tembroblocks_guard.iter_mut().for_each(|s| {
+                    s.do_dt(dt_osc, dt_env);
+                });
+            }
 
             for channels in buffer.as_slice() {
                 channels[sample_index] = out
             }
-
-            let dt_env = 1.0 / self.sample_rate;
-
-            let dt_osc = self.master_freq / self.sample_rate;
-
-            self.tembroblocks.write().iter_mut().for_each(|s| {
-                s.do_dt(dt_osc, dt_env);
-            });
         }
 
         ProcessStatus::Normal

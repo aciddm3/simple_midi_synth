@@ -1,9 +1,9 @@
-use std::f32::consts::FRAC_PI_2;
+// use std::f32::consts::FRAC_PI_2;
 
-use nih_plug_egui::egui::{Color32, Shape, Stroke, epaint::PathStroke, pos2};
+// use nih_plug_egui::egui::{Color32, Shape, Stroke, epaint::PathStroke, pos2};
 
 pub mod param_knob;
-
+/* 
 pub struct Knob<'a> {
     pub uv_value: &'a mut f32,
     pub color: Color32,
@@ -63,3 +63,4 @@ impl<'a> nih_plug_egui::egui::Widget for Knob<'a> {
         response
     }
 }
+*/

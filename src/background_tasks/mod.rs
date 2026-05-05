@@ -22,6 +22,9 @@ impl TaskExec for SimpleSynth {
         let params = self.params.clone();
         let tembroblocks_lock = self.tembroblocks.clone();
         let sine_table = self.sine_table.clone();
+
+        let samplerate = self.sample_rate;
+
         Box::new(move |task| match task {
             BackgroundTasks::OpenFileNoDialog => {
                 let path_opt = params.file_path.read().clone();
@@ -37,6 +40,7 @@ impl TaskExec for SimpleSynth {
                                     amplitude_envelope,
                                     phase_envelope,
                                     pitch_envelope,
+                                    samplerate
                                 ));
                             }
                         }
@@ -51,6 +55,7 @@ impl TaskExec for SimpleSynth {
                         CommonEnvelope::default(),
                         CommonEnvelope::default(),
                         CommonEnvelope::default(),
+                        samplerate
                     ));
                 }
             }
@@ -74,18 +79,20 @@ impl TaskExec for SimpleSynth {
                                 amplitude_envelope,
                                 phase_envelope,
                                 pitch_envelope,
+                                samplerate
                             ));
                         }
                     }
                     Err(e) => {
                         eprintln!("{e}");
-                        if let None = *params.file_path.read() {
+                        if params.file_path.read().is_none() {
                             tembroblocks_lock.write().clear();
                             tembroblocks_lock.write().push(Tembroblock::new(
                                 SineOscillator::new(sine_table.clone()),
                                 CommonEnvelope::default(),
                                 CommonEnvelope::default(),
                                 CommonEnvelope::default(),
+                                samplerate
                             ));
                         }
                         return;
