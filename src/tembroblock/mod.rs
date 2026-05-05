@@ -10,7 +10,6 @@ pub struct Tembroblock {
     pub amplitude_envelope: CommonEnvelope,
     pub phase_envelope: CommonEnvelope,
     pub pitch_envelope: CommonEnvelope,
-    temprate: f32,
     value: f32,
 }
 
@@ -21,14 +20,12 @@ impl Tembroblock {
         amplitude_envelope: CommonEnvelope,
         phase_envelope: CommonEnvelope,
         pitch_envelope: CommonEnvelope,
-        samplerate: f32,
     ) -> Self {
         Self {
             oscillator,
             amplitude_envelope,
             phase_envelope,
             pitch_envelope,
-            temprate: 2.0 / samplerate,
             value: 0.0,
         }
     }
@@ -38,9 +35,15 @@ impl Tembroblock {
         self.oscillator.set_phase(self.phase_envelope.do_dt(dt_env));
 
         let step = dt_osc * 2.0f32.powf(self.pitch_envelope.do_dt(dt_env));
-        self.value = self.amplitude_envelope.do_dt(dt_env) * self.oscillator.do_dt(step);
+        let value = self.amplitude_envelope.do_dt(dt_env) * self.oscillator.do_dt(step);
+        
+        self.value = if step >= 0.49 {
+            0.0
+        } else {
+            value
+        };
 
-        if step <= self.temprate { 0.0 } else { step }
+        self.value
     }
 
     #[inline]

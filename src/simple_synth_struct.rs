@@ -38,7 +38,6 @@ impl Default for SimpleSynth {
                 CommonEnvelope::default(),
                 CommonEnvelope::default(),
                 CommonEnvelope::default(),
-                44100.0
             )])),
             master_freq: 440.0,
             editor_state: EguiState::from_size(600, 200),

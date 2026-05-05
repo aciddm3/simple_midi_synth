@@ -23,8 +23,6 @@ impl TaskExec for SimpleSynth {
         let tembroblocks_lock = self.tembroblocks.clone();
         let sine_table = self.sine_table.clone();
 
-        let samplerate = self.sample_rate;
-
         Box::new(move |task| match task {
             BackgroundTasks::OpenFileNoDialog => {
                 let path_opt = params.file_path.read().clone();
@@ -40,7 +38,6 @@ impl TaskExec for SimpleSynth {
                                     amplitude_envelope,
                                     phase_envelope,
                                     pitch_envelope,
-                                    samplerate
                                 ));
                             }
                         }
@@ -55,7 +52,6 @@ impl TaskExec for SimpleSynth {
                         CommonEnvelope::default(),
                         CommonEnvelope::default(),
                         CommonEnvelope::default(),
-                        samplerate
                     ));
                 }
             }
@@ -79,7 +75,6 @@ impl TaskExec for SimpleSynth {
                                 amplitude_envelope,
                                 phase_envelope,
                                 pitch_envelope,
-                                samplerate
                             ));
                         }
                     }
@@ -92,7 +87,6 @@ impl TaskExec for SimpleSynth {
                                 CommonEnvelope::default(),
                                 CommonEnvelope::default(),
                                 CommonEnvelope::default(),
-                                samplerate
                             ));
                         }
                         return;

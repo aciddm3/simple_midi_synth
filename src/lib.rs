@@ -117,6 +117,7 @@ impl Plugin for simple_synth_struct::SimpleSynth {
                 tembroblocks_guard.iter_mut().for_each(|s| {
                     s.do_dt(dt_osc, dt_env);
                 });
+                // дропаем тут
             }
 
             for channels in buffer.as_slice() {
