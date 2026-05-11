@@ -1,4 +1,11 @@
 {
 	"cSpell.language": "en",
-	"cSpell.enabled": false
+	"cSpell.enabled": true,
+	"cSpell.words": [
+		"aciddm",
+		"egui",
+		"epaint",
+		"serde",
+		"tembroblocks"
+	]
 }

@@ -1,24 +1,46 @@
 [
 	{
-		"pitch_gate_on": "(- (exp (neg arg)) 1.0)",
+		"pitch_gate_on": "(* (sin (* arg TAU) ) (/ 0.01 12) )",
 		"pitch_gate_off": "0.0",
 		"pitch_slew_limit": 1.0,
 		"phase_gate_on": "0.0",
 		"phase_gate_off": "0.0",
 		"phase_slew_limit": 1.0,
-		"amplitude_gate_on": "1.0",
-		"amplitude_gate_off": "(* (sin arg) (sigmoid (neg (const-mul arg 100.0))))",
+		"amplitude_gate_on": "(sigmoid (- arg 2))",
+		"amplitude_gate_off": "(sigmoid (+ (* arg -100) 2))",
 		"amplitude_slew_limit": 0.1
 	},
 	{
-		"pitch_gate_on": "(exp (neg arg))",
+		"pitch_gate_on": "(+ (* (sin (* arg TAU) ) (/ 0.01 12) ) (/ (ln 2) (ln 2)) )",
 		"pitch_gate_off": "0.0",
 		"pitch_slew_limit": 1.0,
 		"phase_gate_on": "0.0",
 		"phase_gate_off": "0.0",
 		"phase_slew_limit": 1.0,
-		"amplitude_gate_on": "0.3",
-		"amplitude_gate_off": "(* (sin arg) (sigmoid (neg (const-mul arg 100.0))))",
+		"amplitude_gate_on": "(sigmoid (- (* arg 2) 2))",
+		"amplitude_gate_off": "(sigmoid (+ (* arg -200) 2))",
+		"amplitude_slew_limit": 0.1
+	},
+	{
+		"pitch_gate_on": "(+ (* (sin (* arg TAU) ) (/ 0.01 12) ) (/ (ln 3) (ln 2)) )",
+		"pitch_gate_off": "0.0",
+		"pitch_slew_limit": 1.0,
+		"phase_gate_on": "0.0",
+		"phase_gate_off": "0.0",
+		"phase_slew_limit": 1.0,
+		"amplitude_gate_on": "(sigmoid (- (* arg 2) 2))",
+		"amplitude_gate_off": "(sigmoid (+ (* arg -300) 2))",
+		"amplitude_slew_limit": 0.1
+	},
+	{
+		"pitch_gate_on": "(+ (* (sin (* arg TAU) ) (/ 0.01 12) ) (/ (ln 4) (ln 2)) )",
+		"pitch_gate_off": "0.0",
+		"pitch_slew_limit": 1.0,
+		"phase_gate_on": "0.0",
+		"phase_gate_off": "0.0",
+		"phase_slew_limit": 1.0,
+		"amplitude_gate_on": "(sigmoid (- (* arg 2) 2))",
+		"amplitude_gate_off": "(sigmoid (+ (* arg -300) 2))",
 		"amplitude_slew_limit": 0.1
 	}
-]
+] 
