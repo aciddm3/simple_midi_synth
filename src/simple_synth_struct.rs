@@ -7,8 +7,10 @@ use nih_plug_egui::EguiState;
 use parking_lot::RwLock;
 use std::sync::Arc;
 
+#[derive(Debug, Default, Clone, Copy)]
 pub struct ActiveNote {
     pub midi_note: u8,
+    pub velocity_normalized : f32,
 }
 
 pub struct SimpleSynth {
@@ -17,9 +19,11 @@ pub struct SimpleSynth {
     pub active_note: Option<ActiveNote>,
     pub tembroblocks: Arc<RwLock<Vec<Tembroblock>>>,
     pub sample_rate: f32,
+    pub dt : f32,
     pub master_freq: f32,
     pub editor_state: Arc<EguiState>,
-    }
+    pub err_msg: Arc<RwLock<String>>,
+}
 
 impl Default for SimpleSynth {
     fn default() -> Self {
@@ -33,6 +37,7 @@ impl Default for SimpleSynth {
             params: Arc::new(SimpleSynthParams::default()),
             active_note: None,
             sample_rate: 44100.0,
+            dt : 1.0 / 44100.0,
             tembroblocks: Arc::new(RwLock::new(vec![Tembroblock::new(
                 SineOscillator::new(sine_table.clone()),
                 CommonEnvelope::default(),
@@ -41,6 +46,7 @@ impl Default for SimpleSynth {
             )])),
             master_freq: 440.0,
             editor_state: EguiState::from_size(600, 200),
+            err_msg: Arc::new(RwLock::new("✔".to_string())),
         }
     }
 }

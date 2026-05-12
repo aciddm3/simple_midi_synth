@@ -1,6 +1,7 @@
 pub mod common_envelope;
 pub mod oscillator;
 
+use aciddm3_atom_func::func::EnvFunctionArguments;
 use common_envelope::*;
 use oscillator::*;
 
@@ -31,17 +32,14 @@ impl Tembroblock {
     }
 
     #[inline]
-    pub fn do_dt(&mut self, dt_osc: f32, dt_env: f32) -> f32 {
-        self.oscillator.set_phase(self.phase_envelope.do_dt(dt_env));
+    pub fn do_dt(&mut self, dt: f32, other_args: EnvFunctionArguments) -> f32 {
+        self.oscillator
+            .set_phase(self.phase_envelope.do_dt(dt, other_args));
 
-        let step = dt_osc * 2.0f32.powf(self.pitch_envelope.do_dt(dt_env));
-        let value = self.amplitude_envelope.do_dt(dt_env) * self.oscillator.do_dt(step);
-        
-        self.value = if step >= 0.49 {
-            0.0
-        } else {
-            value
-        };
+        let step = self.pitch_envelope.do_dt(dt, other_args) * dt;
+        let value = self.amplitude_envelope.do_dt(dt, other_args) * self.oscillator.do_dt(step);
+
+        self.value = if step >= 0.49 { 0.0 } else { value };
 
         self.value
     }

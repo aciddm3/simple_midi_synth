@@ -22,14 +22,15 @@ impl TaskExec for SimpleSynth {
         let params = self.params.clone();
         let tembroblocks_lock = self.tembroblocks.clone();
         let sine_table = self.sine_table.clone();
-
+        let error_msg = self.err_msg.clone();
         Box::new(move |task| match task {
             BackgroundTasks::OpenFileNoDialog => {
                 let path_opt = params.file_path.read().clone();
                 if let Some(path_str) = path_opt
                     && !path_str.is_empty()
                 {
-                    match load_synth::load_synth(&path_str) {
+                    let mut str = error_msg.write();
+                    match load_synth::load_synth(&path_str, &mut str) {
                         Ok(vec) => {
                             tembroblocks_lock.write().clear();
                             for (pitch_envelope, phase_envelope, amplitude_envelope) in vec {
@@ -65,8 +66,9 @@ impl TaskExec for SimpleSynth {
                 };
 
                 let path = path.into_os_string().into_string().unwrap_or_default();
+                let mut str = error_msg.write();
 
-                match load_synth(&path) {
+                match load_synth(&path, &mut str) {
                     Ok(vec) => {
                         tembroblocks_lock.write().clear();
                         for (pitch_envelope, phase_envelope, amplitude_envelope) in vec {

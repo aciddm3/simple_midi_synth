@@ -1,3 +1,4 @@
+use aciddm3_atom_func::func::EnvFunctionArguments;
 use nih_plug::prelude::*;
 use std::sync::Arc;
 
@@ -54,6 +55,11 @@ impl Plugin for simple_synth_struct::SimpleSynth {
                 .collect(),
         );
         self.sample_rate = buffer_config.sample_rate;
+        self.dt = if self.sample_rate != 0.0 {
+            1.0 / self.sample_rate
+        } else {
+            0.0
+        };
         self.master_freq = 440.0;
         context.execute(background_tasks::BackgroundTasks::OpenFileNoDialog);
 
@@ -69,32 +75,31 @@ impl Plugin for simple_synth_struct::SimpleSynth {
     ) -> ProcessStatus {
         while let Some(event) = context.next_event() {
             match event {
-                NoteEvent::NoteOn { note, velocity, .. } => {
-                    if velocity > 0.0 {
-                        self.active_note =
-                            Some(simple_synth_struct::ActiveNote { midi_note: note });
-                        self.tembroblocks
-                            .write()
-                            .iter_mut()
-                            .for_each(|s| s.gate_on());
-                    }
+                NoteEvent::NoteOn { note, velocity, .. } if velocity > 0.0 => {
+                    self.active_note = Some(simple_synth_struct::ActiveNote {
+                        midi_note: note,
+                        velocity_normalized: velocity,
+                    });
+                    self.tembroblocks
+                        .write()
+                        .iter_mut()
+                        .for_each(|s| s.gate_on());
                 }
-                NoteEvent::NoteOff { note, .. } => {
+                NoteEvent::NoteOff { note, .. }
                     if let Some(active) = &self.active_note
-                        && active.midi_note == note
-                    {
-                        self.active_note = None;
-                        self.tembroblocks
-                            .write()
-                            .iter_mut()
-                            .for_each(|s| s.gate_off());
-                    }
+                        && active.midi_note == note =>
+                {
+                    self.active_note = None;
+                    self.tembroblocks
+                        .write()
+                        .iter_mut()
+                        .for_each(|s| s.gate_off());
                 }
                 _ => (),
             }
         }
 
-        if let Some(simple_synth_struct::ActiveNote { midi_note }) = &mut self.active_note {
+        if let Some(simple_synth_struct::ActiveNote { midi_note, .. }) = &mut self.active_note {
             self.master_freq = utils::note_to_freq(
                 (*midi_note as i32 + self.params.transpose.value()) as f32,
                 440.0,
@@ -105,9 +110,6 @@ impl Plugin for simple_synth_struct::SimpleSynth {
 
         for sample_index in 0..num_samples {
             let gain = util::db_to_gain(self.params.gain.smoothed.next());
-            let dt_osc = self.master_freq / self.sample_rate;
-            let dt_env = 1.0 / self.sample_rate;
-
             let mut out;
             {
                 let mut tembroblocks_guard = self.tembroblocks.write();
@@ -115,7 +117,19 @@ impl Plugin for simple_synth_struct::SimpleSynth {
                 out = tembroblocks_guard.iter().map(|s| s.get_value()).sum();
                 out *= gain;
                 tembroblocks_guard.iter_mut().for_each(|s| {
-                    s.do_dt(dt_osc, dt_env);
+                    s.do_dt(
+                        self.dt,
+                        EnvFunctionArguments {
+                            t: 0.0, // invariant
+                            prev_val: 0.0,
+                            freq: self.master_freq,
+                            vel: self.active_note.unwrap_or_default().velocity_normalized,
+                            p1: self.params.p1.smoothed.next(),
+                            p2: self.params.p2.smoothed.next(),
+                            p3: self.params.p3.smoothed.next(),
+                            p4: self.params.p4.smoothed.next(),
+                        },
+                    );
                 });
                 // дропаем тут
             }

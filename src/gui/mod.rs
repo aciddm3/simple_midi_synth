@@ -17,7 +17,7 @@ impl SimpleSynth {
     #[inline]
     pub fn make_gui(&mut self, async_executor: AsyncExecutor<Self>) -> Option<Box<dyn Editor>> {
         let params = self.params.clone();
-
+        let err_msg = self.err_msg.clone();
         let glass_fill = egui::Color32::from_rgba_unmultiplied(25, 25, 35, 180);
         create_egui_editor(
             self.editor_state.clone(),
@@ -58,15 +58,72 @@ impl SimpleSynth {
                         );
                         ui.vertical(|ui| {
                             ui.vertical(|ui| {
-                                ui.label("Master Gain");
-                                ui.add_sized(
-                                    vec2(40.0, 40.0),
-                                    ParamKnob {
-                                        setter,
-                                        color: Color32::WHITE,
-                                        param: &params.gain,
-                                    },
-                                );
+                                ui.columns(5, |col| {
+                                    col[0].vertical_centered(|ui| {
+                                        ui.label("Master Gain");
+                                        ui.add_sized(
+                                            vec2(40.0, 40.0),
+                                            ParamKnob {
+                                                setter,
+                                                color: Color32::RED,
+                                                param: &params.gain,
+                                            },
+                                        );
+                                        ui.label(format!(
+                                            "{:.3}, {}",
+                                            params.gain.value(),
+                                            params.gain.unit()
+                                        ));
+                                    });
+                                    col[1].vertical_centered(|ui| {
+                                        ui.label(params.p1.name());
+                                        ui.add_sized(
+                                            vec2(40.0, 40.0),
+                                            ParamKnob {
+                                                setter,
+                                                color: Color32::WHITE,
+                                                param: &params.p1,
+                                            },
+                                        );
+                                        ui.label(format!("{:.3}", params.p1.value()));
+                                    });
+                                    col[2].vertical_centered(|ui| {
+                                        ui.label(params.p2.name());
+                                        ui.add_sized(
+                                            vec2(40.0, 40.0),
+                                            ParamKnob {
+                                                setter,
+                                                color: Color32::WHITE,
+                                                param: &params.p2,
+                                            },
+                                        );
+                                        ui.label(format!("{:.3}", params.p2.value()));
+                                    });
+                                    col[3].vertical_centered(|ui| {
+                                        ui.label(params.p3.name());
+                                        ui.add_sized(
+                                            vec2(40.0, 40.0),
+                                            ParamKnob {
+                                                setter,
+                                                color: Color32::WHITE,
+                                                param: &params.p3,
+                                            },
+                                        );
+                                        ui.label(format!("{:.3}", params.p3.value()));
+                                    });
+                                    col[4].vertical_centered(|ui| {
+                                        ui.label(params.p4.name());
+                                        ui.add_sized(
+                                            vec2(40.0, 40.0),
+                                            ParamKnob {
+                                                setter,
+                                                color: Color32::WHITE,
+                                                param: &params.p4,
+                                            },
+                                        );
+                                        ui.label(format!("{:.3}", params.p4.value()));
+                                    });
+                                });
                                 ui.label("Transpose");
                                 ui.add(widgets::ParamSlider::for_param(&params.transpose, setter));
 
@@ -78,8 +135,9 @@ impl SimpleSynth {
                                 let path_guard = params.file_path.read();
                                 let filename: &str = path_guard.as_deref().unwrap_or("None");
                                 ui.label(format!("File loaded : {filename}"));
+                                ui.label(err_msg.read().as_str());
                             });
-                        })
+                        });
                     });
             },
         )

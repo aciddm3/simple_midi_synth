@@ -1,6 +1,6 @@
 [
 	{
-		"pitch_gate_on": "(* (sin (* arg TAU) ) (/ 0.01 12) )",
+		"pitch_gate_on": "(oct (* (sin (* arg TAU) ) (/ 0.01 12) ) freq)",
 		"pitch_gate_off": "0.0",
 		"pitch_slew_limit": 1.0,
 		"phase_gate_on": "0.0",
@@ -11,7 +11,7 @@
 		"amplitude_slew_limit": 0.1
 	},
 	{
-		"pitch_gate_on": "(+ (* (sin (* arg TAU) ) (/ 0.01 12) ) (/ (ln 2) (ln 2)) )",
+		"pitch_gate_on": "(oct (+ (* (sin (* arg TAU) ) (/ 0.01 12) ) (/ (ln 2) (ln 2)) ) freq)",
 		"pitch_gate_off": "0.0",
 		"pitch_slew_limit": 1.0,
 		"phase_gate_on": "0.0",
@@ -22,7 +22,7 @@
 		"amplitude_slew_limit": 0.1
 	},
 	{
-		"pitch_gate_on": "(+ (* (sin (* arg TAU) ) (/ 0.01 12) ) (/ (ln 3) (ln 2)) )",
+		"pitch_gate_on": "(oct (+ (* (sin (* arg TAU) ) (/ 0.01 12) ) (/ (ln 3) (ln 2)) ) freq)",
 		"pitch_gate_off": "0.0",
 		"pitch_slew_limit": 1.0,
 		"phase_gate_on": "0.0",
@@ -33,7 +33,7 @@
 		"amplitude_slew_limit": 0.1
 	},
 	{
-		"pitch_gate_on": "(+ (* (sin (* arg TAU) ) (/ 0.01 12) ) (/ (ln 4) (ln 2)) )",
+		"pitch_gate_on": "(oct (+ (* (sin (* arg TAU) ) (/ 0.01 12) ) (/ (ln 4) (ln 2)) ) freq)",
 		"pitch_gate_off": "0.0",
 		"pitch_slew_limit": 1.0,
 		"phase_gate_on": "0.0",

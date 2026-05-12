@@ -29,7 +29,7 @@ Yo can change pitch, phase and amplitude.
 ```json
 [ <- list of sines
  { <- Sine 1
- "pitch_gate_on": "(* (sin arg) (const-mul (exp (const-mul arg -4.0)) 1))",
+ "pitch_gate_on": "(oct (/ (exp (* arg -4.0)) 100.0) freq)",
  "pitch_gate_off": "0.0",
  "pitch_slew_limit" : 1.0,
  ^ octave shift
@@ -43,7 +43,8 @@ Yo can change pitch, phase and amplitude.
  ^ amplitude shift
  },
  { <- Sine 2
- "pitch_gate_on": "(* (sin (linear arg 1.0 -1.57075)) (const-mul (exp (const-mul arg -4.0)) 2))",
+ "pitch_gate_on": "(* 3 freq)",
+ ^ absolute frequency (Hz)
  "pitch_gate_off": "0.0",
  "pitch_slew_limit" : 1.0,
  "phase_gate_on": "0.0",
