@@ -5,8 +5,10 @@ use parking_lot::RwLock;
 pub struct SimpleSynthParams {
     #[id = "gain"]
     pub gain: FloatParam,
-    #[id = "transpose"]
-    pub transpose: IntParam,
+    #[id = "transpose_oct"]
+    pub transpose_oct: IntParam,
+    #[id = "transpose_semitones"]
+    pub transpose_semitones: IntParam,
     #[id = "parameter1"]
     pub p1 : FloatParam,
     #[id = "parameter2"]
@@ -31,8 +33,8 @@ impl Default for SimpleSynthParams {
                 },
             )
             .with_unit("dB"),
-            transpose: IntParam::new("Transpose", 0, IntRange::Linear { min: -48, max: 48 })
-                .with_unit("st"),
+            transpose_oct: IntParam::new("Oct", 0, IntRange::Linear { min: -4, max: 4 }),
+            transpose_semitones: IntParam::new("ST", 0, IntRange::Linear { min: -12, max: 12 }),
             file_path: RwLock::new(Some("".to_string())),
             p1 : FloatParam::new("Param1", 0.0, FloatRange::Linear { min: 0.0, max: 1.0 }),
             p2 : FloatParam::new("Param2", 0.0, FloatRange::Linear { min: 0.0, max: 1.0 }),

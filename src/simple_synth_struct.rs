@@ -45,7 +45,7 @@ impl Default for SimpleSynth {
                 CommonEnvelope::default(),
             )])),
             master_freq: 440.0,
-            editor_state: EguiState::from_size(600, 200),
+            editor_state: EguiState::from_size(600, 240),
             err_msg: Arc::new(RwLock::new("✔".to_string())),
         }
     }

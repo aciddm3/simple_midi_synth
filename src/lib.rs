@@ -101,7 +101,9 @@ impl Plugin for simple_synth_struct::SimpleSynth {
 
         if let Some(simple_synth_struct::ActiveNote { midi_note, .. }) = &mut self.active_note {
             self.master_freq = utils::note_to_freq(
-                (*midi_note as i32 + self.params.transpose.value()) as f32,
+                (*midi_note as i32
+                    + 12 * self.params.transpose_oct.value()
+                    + self.params.transpose_semitones.value()) as f32,
                 440.0,
             );
         };

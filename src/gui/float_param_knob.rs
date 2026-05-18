@@ -6,13 +6,13 @@ use nih_plug::{
 };
 use nih_plug_egui::egui::{Color32, Shape, Stroke, epaint::PathStroke, pos2};
 
-pub struct ParamKnob<'a> {
+pub struct ParamKnobFloat<'a> {
     pub setter: &'a ParamSetter<'a>,
     pub color: Color32,
     pub param: &'a FloatParam,
 }
 
-impl<'a> nih_plug_egui::egui::Widget for ParamKnob<'a> {
+impl<'a> nih_plug_egui::egui::Widget for ParamKnobFloat<'a> {
     fn ui(self, ui: &mut nih_plug_egui::egui::Ui) -> nih_plug_egui::egui::Response {
         let desired_size = ui.available_size_before_wrap();
         let (rect, response) =
@@ -75,8 +75,8 @@ impl<'a> nih_plug_egui::egui::Widget for ParamKnob<'a> {
         }
 
         if response.dragged() {
-            let delta_x = response.drag_delta().y;
-            uv_value = (uv_value - delta_x * 0.01).clamp(0.0, 1.0);
+            let delta_y = response.drag_delta().y;
+            uv_value = (uv_value - delta_y * 0.01).clamp(0.0, 1.0);
         }
 
         self.setter.begin_set_parameter(self.param);

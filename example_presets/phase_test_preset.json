@@ -6,8 +6,8 @@
     "phase_gate_on": "0.0",
     "phase_gate_off": "0.0",
 	"phase_slew_limit" : 1.0,
-	"amplitude_gate_on": "(sigmoid arg)",
-    "amplitude_gate_off": "(sigmoid (const-mul arg -4.0))",
+	"amplitude_gate_on": "(sigmoid (- (* (* p2 5) arg) 5))",
+    "amplitude_gate_off": "(* (sigmoid (* arg -4.0)) (* 2 prval))",
 	"amplitude_slew_limit" : 0.5
 	},
 
@@ -16,10 +16,10 @@
     "pitch_gate_off": "freq",
 	"pitch_slew_limit" : 1.0,
     "phase_gate_on": "(linear (sin (* (* 10 TAU) (* p1 arg))) 0.5 0.5)",
-    "phase_gate_off": "0.0",
+    "phase_gate_off": "prval",
 	"phase_slew_limit" : 1.0,
-	"amplitude_gate_on": "(sigmoid arg)",
-    "amplitude_gate_off": "(sigmoid (const-mul arg -4.0))",
+	"amplitude_gate_on": "(sigmoid (- (* (* p2 5) arg) 5))",
+    "amplitude_gate_off": "(* (sigmoid (* arg -4.0)) (* 2 prval))",
 	"amplitude_slew_limit" : 0.5
 	}
 ]

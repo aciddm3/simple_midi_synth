@@ -1,15 +1,15 @@
-mod param_knob;
+mod float_param_knob;
+mod int_param_knob;
 
 use nih_plug::prelude::*;
 use nih_plug_egui::{
     create_egui_editor,
     egui::{self, Button, Color32, Rect, pos2, vec2},
-    widgets,
 };
 
-use crate::{
-    background_tasks::BackgroundTasks, gui::param_knob::ParamKnob, simple_synth_struct::SimpleSynth,
-};
+use crate::{background_tasks::BackgroundTasks, simple_synth_struct::SimpleSynth};
+
+use crate::gui::{float_param_knob::ParamKnobFloat, int_param_knob::ParamKnobInt};
 
 const DALETH_COLOR: Color32 = Color32::from_rgb(64, 64, 64);
 
@@ -63,7 +63,7 @@ impl SimpleSynth {
                                         ui.label("Master Gain");
                                         ui.add_sized(
                                             vec2(40.0, 40.0),
-                                            ParamKnob {
+                                            ParamKnobFloat {
                                                 setter,
                                                 color: Color32::RED,
                                                 param: &params.gain,
@@ -74,24 +74,45 @@ impl SimpleSynth {
                                             params.gain.value(),
                                             params.gain.unit()
                                         ));
+                                        ui.label("Oct");
+                                        ui.add_sized(
+                                            vec2(40.0, 40.0),
+                                            ParamKnobInt {
+                                                param: &params.transpose_oct,
+                                                color: Color32::GREEN,
+                                                setter,
+                                            },
+                                        );
+                                        ui.label(format!("{}", params.transpose_oct.value()));
                                     });
                                     col[1].vertical_centered(|ui| {
                                         ui.label(params.p1.name());
                                         ui.add_sized(
                                             vec2(40.0, 40.0),
-                                            ParamKnob {
+                                            ParamKnobFloat {
                                                 setter,
                                                 color: Color32::WHITE,
                                                 param: &params.p1,
                                             },
                                         );
                                         ui.label(format!("{:.3}", params.p1.value()));
+                                        
+                                        ui.label("st");
+                                        ui.add_sized(
+                                            vec2(40.0, 40.0),
+                                            ParamKnobInt {
+                                                param: &params.transpose_semitones,
+                                                color: Color32::GREEN,
+                                                setter,
+                                            },
+                                        );
+                                        ui.label(format!("{}", params.transpose_semitones.value()));
                                     });
                                     col[2].vertical_centered(|ui| {
                                         ui.label(params.p2.name());
                                         ui.add_sized(
                                             vec2(40.0, 40.0),
-                                            ParamKnob {
+                                            ParamKnobFloat {
                                                 setter,
                                                 color: Color32::WHITE,
                                                 param: &params.p2,
@@ -103,7 +124,7 @@ impl SimpleSynth {
                                         ui.label(params.p3.name());
                                         ui.add_sized(
                                             vec2(40.0, 40.0),
-                                            ParamKnob {
+                                            ParamKnobFloat {
                                                 setter,
                                                 color: Color32::WHITE,
                                                 param: &params.p3,
@@ -115,7 +136,7 @@ impl SimpleSynth {
                                         ui.label(params.p4.name());
                                         ui.add_sized(
                                             vec2(40.0, 40.0),
-                                            ParamKnob {
+                                            ParamKnobFloat {
                                                 setter,
                                                 color: Color32::WHITE,
                                                 param: &params.p4,
@@ -124,8 +145,6 @@ impl SimpleSynth {
                                         ui.label(format!("{:.3}", params.p4.value()));
                                     });
                                 });
-                                ui.label("Transpose");
-                                ui.add(widgets::ParamSlider::for_param(&params.transpose, setter));
 
                                 let response = ui.add(Button::new("Load File"));
                                 if response.clicked() {
