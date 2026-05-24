@@ -1,15 +1,21 @@
-
 #[derive(Debug, Clone, Copy)]
 pub struct SlewLimiter {
-	max: f32,
+    max: f32,
     min: f32,
     curr_value: f32,
 }
 
 impl SlewLimiter {
-	pub fn new(mut min: f32, mut max: f32) -> Self {
-		if min > max {
-			std::mem::swap(&mut min, &mut max);
+    
+    pub const MAX_VALUE_LIMITER: SlewLimiter = SlewLimiter {
+        max: f32::MAX,
+        min: f32::MIN,
+        curr_value: 0.0,
+    };
+    
+    pub fn new(mut min: f32, mut max: f32) -> Self {
+        if min > max {
+            std::mem::swap(&mut min, &mut max);
         }
         Self {
             max,
@@ -17,7 +23,7 @@ impl SlewLimiter {
             curr_value: 0.0,
         }
     }
-	#[inline]
+    #[inline]
     pub fn process(&mut self, value: f32) -> f32 {
         self.curr_value += (value - self.curr_value).clamp(self.min, self.max);
         self.curr_value

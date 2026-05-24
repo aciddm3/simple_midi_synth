@@ -52,7 +52,7 @@ impl TaskExec for SimpleSynth {
                         SineOscillator::new(sine_table.clone()),
                         CommonEnvelope::default(),
                         CommonEnvelope::default(),
-                        CommonEnvelope::default(),
+                        CommonEnvelope::FREQ_ENV,
                     ));
                 }
             }

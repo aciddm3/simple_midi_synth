@@ -15,6 +15,17 @@ pub struct CommonEnvelope {
     phase: EnvPhase,
 }
 
+impl CommonEnvelope {
+    pub const FREQ_ENV: CommonEnvelope = CommonEnvelope {
+        gate_on_func: EnvFunction::Frequency,
+        gate_off_func: EnvFunction::Frequency,
+        slew_limiter: SlewLimiter::MAX_VALUE_LIMITER,
+        value: 0.0,
+        prev_phase_last_value: 0.0,
+        phase: EnvPhase::GateOff(0.0),
+    };
+}
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 enum EnvPhase {
     GateOn(f32),
@@ -25,8 +36,8 @@ impl Default for CommonEnvelope {
     fn default() -> Self {
         Self {
             value: 0.0,
-            prev_phase_last_value : 0.0,
-            slew_limiter: SlewLimiter::new(f32::MIN, f32::MAX),
+            prev_phase_last_value: 0.0,
+            slew_limiter: SlewLimiter::MAX_VALUE_LIMITER,
             gate_on_func: EnvFunction::Constant(1.0),
             gate_off_func: EnvFunction::Constant(0.0),
             phase: EnvPhase::GateOff(0.0),
@@ -38,7 +49,7 @@ impl CommonEnvelope {
     pub fn new(gate_on_func: EnvFunction, gate_off_func: EnvFunction, slew_limition: f32) -> Self {
         Self {
             value: 0.0,
-            prev_phase_last_value : 0.0,
+            prev_phase_last_value: 0.0,
             slew_limiter: SlewLimiter::new(-slew_limition.abs(), slew_limition.abs()),
             gate_on_func,
             gate_off_func,

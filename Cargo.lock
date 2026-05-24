@@ -25,7 +25,7 @@ source = "git+https://github.com/aciddm3/atom_func.git#ed0faa3da0b7152f2041a7fe7
 
 [[package]]
 name = "aciddm3_daleth"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "aciddm3_atom_func",
  "nih_plug",

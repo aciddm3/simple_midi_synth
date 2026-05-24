@@ -42,7 +42,7 @@ impl Default for SimpleSynth {
                 SineOscillator::new(sine_table.clone()),
                 CommonEnvelope::default(),
                 CommonEnvelope::default(),
-                CommonEnvelope::default(),
+                CommonEnvelope::FREQ_ENV,
             )])),
             master_freq: 440.0,
             editor_state: EguiState::from_size(600, 240),
